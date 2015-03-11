@@ -1,3 +1,5 @@
-1
-1
-1
+summarize(statsd.fakesite.timers.ads_timer.upper_25, "40min", "max"),1426096800,1426106400,2400|3.0,7.0,5.0,6.0
+summarize(statsd.fakesite.timers.ads_timer.upper_50, "40min", "max"),1426096800,1426106400,2400|230.0,336.0,308.0,317.0
+summarize(statsd.fakesite.timers.ads_timer.upper_75, "40min", "max"),1426096800,1426106400,2400|721.0,901.0,862.0,783.0
+summarize(statsd.fakesite.timers.ads_timer.upper_90, "40min", "max"),1426096800,1426106400,2400|1427.0,1757.0,1693.0,1501.0
+summarize(statsd.fakesite.timers.ads_timer.upper_95, "40min", "max"),1426096800,1426106400,2400|2415.0,2891.0,2852.0,2527.0

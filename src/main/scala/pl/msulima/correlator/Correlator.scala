@@ -43,16 +43,36 @@ object Correlator extends App {
   private val correlations = CrossCorrelator.pearson(series.map(_._2))
 
   private val longestName = seriesNames.map(_.size).max
-  print(" " * longestName + "   ")
-  println((0 until series.size).map(assignLetter).mkString(" "))
+
+  private val NameThreshold = 30
+  if (longestName > NameThreshold) {
+    for (i <- series.indices) {
+      println(printStriped(i, s"${assignLetter(i)} = ${seriesNames(i)}"))
+    }
+    println()
+    print("    ")
+  } else {
+    print(" " * longestName + "     ")
+  }
+
+  println(series.indices.map(i => s"${assignLetter(i)}  ").mkString(" "))
 
   for {
-    i <- 0 until series.size
+    i <- series.indices
   } {
-    val row = correlations(i)
     val serieName = seriesNames(i)
-    print(" " * (longestName - serieName.length) + serieName + assignLetter(i) + " ")
-    row.foreach(printCell)
+    val namePrefix = if (longestName <= NameThreshold) {
+      s"${" " * (longestName - serieName.length)}$serieName "
+    } else {
+      ""
+    }
+    print(namePrefix + assignLetter(i) + " ")
+    val row = correlations(i)
+    row.dropRight(1).foreach(printCell)
+    for {
+      j <- i until correlations.size
+    } printCellFaded(correlations(j)(i))
+
     println()
   }
 
@@ -74,6 +94,20 @@ object Correlator extends App {
 
   private def printCell(value: Double) = {
     print(escape + s"[${picker(value)}m")
+    print(f"$value% 2.2f ")
+    print(escape + "[0m")
+  }
+
+  private def printStriped(idx: Int, text: String) = {
+    if (idx % 2 == 0) {
+      escape + "[48;5;238m" + text + escape + "[0m"
+    } else {
+      text
+    }
+  }
+
+  private def printCellFaded(value: Double) = {
+    print(escape + "[38;5;242m")
     print(f"$value% 2.2f ")
     print(escape + "[0m")
   }
