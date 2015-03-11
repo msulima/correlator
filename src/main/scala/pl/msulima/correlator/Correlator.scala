@@ -1,8 +1,27 @@
 package pl.msulima.correlator
 
+import java.net.MalformedURLException
+
 import scala.io.Source
 
 object Correlator extends App {
+
+  if (args.isEmpty) {
+    sys.error("usage: [seriesFile]")
+    sys.exit(1)
+  }
+
+  private val series = {
+    val sourceName = args(0)
+    readSource(() => {
+      try {
+        Source.fromURL(sourceName)
+      } catch {
+        case ex: MalformedURLException =>
+          Source.fromFile(sourceName)
+      }
+    })
+  }
 
   private val escape = 27.toChar
   private val picker = {
@@ -18,48 +37,50 @@ object Correlator extends App {
       s.close()
     }
   }
-  // print palette
-  (-10 to 10).foreach(x => printCell(x.toDouble / 10))
-  println()
-  println()
+  printPalette()
 
-  private val seriesNames = Seq("serie1.txt", "serie2.txt", "s3.txt")
-
-  private val series = CrossCorrelator.pearson(seriesNames.map(serie => {
-    readSource(() => Source.fromFile(serie))
-  }))
+  private val seriesNames = series.map(_._1)
+  private val correlations = CrossCorrelator.pearson(series.map(_._2))
 
   private val longestName = seriesNames.map(_.size).max
   print(" " * longestName + "   ")
-  println((0 until series.size).map(idx => {
-    val letter = (idx + 'A').toChar
-    f"$letter%3s  "
-  }).mkString(" "))
+  println((0 until series.size).map(assignLetter).mkString(" "))
+
   for {
     i <- 0 until series.size
   } {
-    val row = series(i)
+    val row = correlations(i)
     val serieName = seriesNames(i)
-    val letter = (i + 'A').toChar
-    print(" " * (longestName - serieName.length) + serieName + f"$letter%3s ")
+    print(" " * (longestName - serieName.length) + serieName + assignLetter(i) + " ")
     row.foreach(printCell)
     println()
   }
 
-  private def readSource(source: () => Source): Seq[Double] = {
+  private def readSource(source: () => Source): Seq[(String, Seq[Double])] = {
     val s = source()
 
     try {
-      s.getLines().toVector.map(_.toDouble)
+      FileParser.raw(s.getLines()).toVector
     } finally {
       ex: RuntimeException =>
         s.close()
     }
   }
 
+  private def assignLetter(idx: Int) = {
+    val letter = (idx + 'A').toChar
+    f"$letter%3s"
+  }
+
   private def printCell(value: Double) = {
     print(escape + s"[${picker(value)}m")
     print(f"$value% 2.2f ")
     print(escape + "[0m")
+  }
+
+  private def printPalette(): Unit = {
+    (-10 to 10).foreach(x => printCell(x.toDouble / 10))
+    println()
+    println()
   }
 }

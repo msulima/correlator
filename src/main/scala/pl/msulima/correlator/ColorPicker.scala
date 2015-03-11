@@ -5,6 +5,8 @@ import scala.annotation.tailrec
 class ColorPicker(colors: Seq[(Double, String)]) extends Function[Double, String] {
 
   override def apply(value: Double) = {
+    val roundedValue = Math.round(value * 100).toDouble / 100
+
     @tailrec
     def color0(colors: Seq[(Double, String)]): String = {
       if (colors.size == 1) {
@@ -12,7 +14,7 @@ class ColorPicker(colors: Seq[(Double, String)]) extends Function[Double, String
       } else {
         val (left, right) = colors.splitAt(colors.size / 2)
 
-        if (right.head._1 > value) {
+        if (right.head._1 > roundedValue) {
           color0(left)
         } else {
           color0(right)

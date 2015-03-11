@@ -5,7 +5,7 @@ import org.specs2.mutable.Specification
 
 class ColorPickerTest extends Specification with DataTables {
 
-  private val colors = Seq(-1.0 -> "1", 0.0 -> "2", 0.5 -> "3")
+  private val colors = Seq(-1.0 -> "1", 0.0 -> "2", 0.5 -> "3", 1.0 -> "4")
   private val picker = new ColorPicker(colors)
 
   "picks color" in
@@ -14,7 +14,9 @@ class ColorPickerTest extends Specification with DataTables {
       -0.5 !! "1" |
       0.0 !! "2" |
       0.5 !! "3" |
-      1.0 !! "3" |> {
+      0.994 !! "3" |
+      0.995 !! "4" |
+      1.0 !! "4" |> {
       (value: Double, color: String) =>
         // when
         val result = picker(value)
